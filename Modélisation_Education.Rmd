@@ -1,0 +1,539 @@
+---
+title: "Modélisation mémoire Education"
+author: "Davidson Adrien"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    number_sections: true
+    toc: true
+    toc_depth: 4
+    theme: readable
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+options(scipen = 999)
+```
+
+
+# **Importing required packages**
+
+```{r import packages}
+suppressPackageStartupMessages(library(readxl))
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(caret))
+suppressPackageStartupMessages(library(glmulti))
+suppressPackageStartupMessages(library(flextable))
+suppressPackageStartupMessages(library(performance))
+suppressPackageStartupMessages(library(Rcpp))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(see))
+suppressPackageStartupMessages(library(skimr))
+suppressPackageStartupMessages(library(ggthemes))
+suppressPackageStartupMessages(library(dlookr))
+suppressPackageStartupMessages(library(report))
+suppressPackageStartupMessages(library(ggstatsplot))
+suppressPackageStartupMessages(library(gt))
+suppressPackageStartupMessages(library(survival))
+suppressPackageStartupMessages(library(MASS))
+suppressPackageStartupMessages(library(gtsummary))
+suppressPackageStartupMessages(library(ggfortify))
+
+```
+
+
+# **Importing the dataset for LR**
+
+```{r import dataset}
+df_mem <- read_excel('./Data_model2.xlsx')
+data_contraint <- read_excel('./Occurence_contraintes.xlsx') 
+
+```
+
+
+# **Data wrangling**
+
+## Factorizing the variables
+
+```{r data wrangling: as.factor-ing the variables}
+df_mem$depot <- as.factor(df_mem$depot)
+df_mem$recoded_temps_depot <- as.factor(df_mem$recoded_temps_depot)
+df_mem$sexe <- as.factor(df_mem$sexe)
+df_mem$loc_etud_sec <- as.factor(df_mem$loc_etud_sec)
+df_mem$type_etab_term <- as.factor(df_mem$type_etab_term)
+df_mem$compos_seuh <- as.factor(df_mem$compos_seuh)
+df_mem$domaine_etud1 <- as.factor(df_mem$domaine_etud1)
+df_mem$domaine_etud2 <- as.factor(df_mem$domaine_etud2)
+df_mem$generation <- as.factor(df_mem$generation)
+df_mem$autr_etud <- as.factor(df_mem$autr_etud)
+df_mem$approche <- as.factor(df_mem$approche)
+df_mem$qual_accomp <- as.factor(df_mem$qual_accomp)
+df_mem$temps_emploi <- as.factor(df_mem$temps_emploi)
+df_mem$contrainte <- as.factor(df_mem$contrainte)
+
+df_mem$contrainte_interet <- as.integer(df_mem$contrainte_interet)
+df_mem$contrainte_interet <- as.factor(df_mem$contrainte_interet)
+
+df_mem$contrainte_motivation <- as.integer(df_mem$contrainte_motivation)
+df_mem$contrainte_motivation <- as.factor(df_mem$contrainte_motivation)
+
+df_mem$contrainte_ordi <- as.integer(df_mem$contrainte_ordi)
+df_mem$contrainte_ordi <- as.factor(df_mem$contrainte_ordi)
+
+df_mem$contrainte_elect <- as.integer(df_mem$contrainte_elect)
+df_mem$contrainte_elect <- as.factor(df_mem$contrainte_elect)
+
+df_mem$contrainte_internet <- as.integer(df_mem$contrainte_internet)
+df_mem$contrainte_internet <- as.factor(df_mem$contrainte_internet)
+
+df_mem$contrainte_boulot <- as.integer(df_mem$contrainte_boulot)
+df_mem$contrainte_boulot <- as.factor(df_mem$contrainte_boulot)
+
+df_mem$contrainte_fam <- as.integer(df_mem$contrainte_fam)
+df_mem$contrainte_fam <- as.factor(df_mem$contrainte_fam)
+
+df_mem$contrainte_sante <- as.integer(df_mem$contrainte_sante)
+df_mem$contrainte_sante <- as.factor(df_mem$contrainte_sante)
+
+df_mem$contrainte_note <- as.integer(df_mem$contrainte_note)
+df_mem$contrainte_note <- as.factor(df_mem$contrainte_note)
+
+df_mem$contrainte_finance <- as.integer(df_mem$contrainte_finance)
+df_mem$contrainte_finance <- as.factor(df_mem$contrainte_finance)
+
+df_mem$contrainte_autr_etud <- as.integer(df_mem$contrainte_autr_etud)
+df_mem$contrainte_autr_etud <- as.factor(df_mem$contrainte_autr_etud)
+
+df_mem$contrainte_sujet_recherche <- as.integer(df_mem$contrainte_sujet_recherche)
+df_mem$contrainte_sujet_recherche <- as.factor(df_mem$contrainte_sujet_recherche)
+
+df_mem$contrainte_sujet_complexe <- as.integer(df_mem$contrainte_sujet_complexe)
+df_mem$contrainte_sujet_complexe <- as.factor(df_mem$contrainte_sujet_complexe)
+
+df_mem$contrainte_donnees <- as.integer(df_mem$contrainte_donnees)
+df_mem$contrainte_donnees <- as.factor(df_mem$contrainte_donnees)
+
+df_mem$contrainte_analyse_donnees <- as.integer(df_mem$contrainte_analyse_donnees)
+df_mem$contrainte_analyse_donnees <- as.factor(df_mem$contrainte_analyse_donnees)
+
+df_mem$contrainte_encadrement <- as.integer(df_mem$contrainte_encadrement)
+df_mem$contrainte_encadrement <- as.factor(df_mem$contrainte_encadrement)
+
+df_mem$contrainte_emigration <- as.integer(df_mem$contrainte_emigration)
+df_mem$contrainte_emigration <- as.factor(df_mem$contrainte_emigration)
+
+df_mem$contrainte_autre <- as.integer(df_mem$contrainte_autre)
+df_mem$contrainte_autre <- as.factor(df_mem$contrainte_autre)
+
+df_mem$info_tfe <- as.factor(df_mem$info_tfe)
+df_mem$difficulte_tfe <- as.factor(df_mem$difficulte_tfe)
+df_mem$utilite_tfe <- as.factor(df_mem$utilite_tfe)
+df_mem$projet_personnel <- as.factor(df_mem$projet_personnel)
+df_mem$choix_etud <- as.factor(df_mem$choix_etud)
+df_mem$education_fam <- as.factor(df_mem$education_fam)
+
+df_mem$consommation_pps <- as.integer(df_mem$consommation_pps)
+df_mem$consommation_pps <- as.factor(df_mem$consommation_pps)
+
+```
+
+
+## Partitions of the dataset for modelling purposes
+
+```{r Partitions of the dataset for modelling purposes}
+#Partitionning the dataset
+var1 <- c('sexe', 'loc_etud_sec', 'type_etab_term', 'compos_seuh', 'domaine_etud1',
+          'autr_etud', 'generation', 'approche', 'qual_accomp', 'temps_emploi',  
+          'info_tfe', 'difficulte_tfe', 'utilite_tfe', 'projet_personnel',
+          'choix_etud', 'consommation_pps', 'education_fam', 'contrainte_motivation')
+
+df1 <- df_mem %>%
+  select(depot, var1)
+
+df2 <- df_mem %>%
+    select(colnames(df_mem), -var1, -c('soutenance', 'temps_soutenance',
+                                     'duree_etud_pot', 'duree_etud_reel',
+                                     'duree_etud_diff', 'consent', 'preciser_etab_term',
+                                     'etud_1', 'tranche_age', 'fac',
+                                     'etud_2', 'comment_accomp',
+                                     'preciser_autr_contr', 'domaine_etud2',
+                                     'comment_difficulte', 'comment_utilite',
+                                     'promotion', 'recoded_temps_depot', 'contrainte')) %>%
+  mutate(depot = ifelse(depot == "Oui", 1, 0))
+
+df3 <- df_mem %>%
+  filter(contrainte == "Oui") %>%
+    select(colnames(df_mem),-var1, contrainte, -c('soutenance', 'temps_soutenance',
+                                     'duree_etud_pot', 'duree_etud_reel',
+                                     'duree_etud_diff', 'consent', 'preciser_etab_term', 'etud_1', 'tranche_age', 'fac', 'etud_2', 'comment_accomp',
+                                     'preciser_autr_contr', 'domaine_etud2',
+                                     'comment_difficulte', 'comment_utilite',
+                                     'promotion', 'recoded_temps_depot', 'contrainte')) %>%
+  mutate(depot = ifelse(depot == "Oui", 1, 0)) 
+
+df1_col <- list(colnames(df1))
+df2_col <- list(colnames(df2))
+
+#variables in df1
+df1_col
+
+#Variables in df2
+df2_col
+```
+
+# **Multivariate Analysis I**
+
+## Logistic Regression
+
+### Stepwise selection: logistic regression
+
+```{r}
+model1 <- glm(depot ~ ., data = df1, family = 'binomial')
+
+null_model1 <- glm(depot ~ 1, data = df1, family = 'binomial')
+
+opt_model1 <- step(null_model1, direction = 'both',
+                  scope = list(upper=model1, lower=null_model1), 
+                  trace = FALSE)
+
+```
+
+
+
+### Check on quality: Model 1
+
+```{r}
+# Model coefficients
+summary(opt_model1)
+```
+
+
+A better representation for the model results:
+
+```{r}
+tab_mod1 <-tbl_regression(opt_model1, exponentiate = TRUE) %>%
+  add_significance_stars(hide_p = F, hide_se = T, hide_ci = F) %>%
+  bold_p(t = 0.10) %>%
+  bold_labels()
+tab_mod1
+```
+
+```{r}
+# Quality
+check_model(opt_model1)
+```
+
+
+
+```{r, echo = FALSE, include=FALSE}
+## Survival Analysis I
+### Stepwise selection: `contrainte` "Oui" and "Non"
+# Index column
+df2$id <- 1:nrow(df2)
+
+surv_obj <- Surv(df2$temps_depot, df2$depot)
+fullmodel <- coxph(surv_obj ~ contrainte_interet + contrainte_internet +
+         contrainte_ordi + contrainte_elect + contrainte_boulot + contrainte_fam +
+         contrainte_sante + contrainte_note + contrainte_finance + contrainte_autr_etud +
+         contrainte_sujet_complexe + contrainte_sujet_recherche + contrainte_donnees +
+         contrainte_analyse_donnees + contrainte_encadrement + contrainte_emigration +
+         contrainte_autre, id = id, data = df2)
+
+cox_step <- stepAIC(fullmodel, direction = "both", trace = FALSE)
+summary(cox_step)
+```
+
+
+
+
+```{r, echo = FALSE, include=FALSE}
+## Survival Analysis II
+
+### Stepwise selection: `contrainte` "Oui" only
+# Index column
+df3$id <- 1:nrow(df3)
+
+surv_obj2 <- Surv(df3$temps_depot, df3$depot)
+fullmodel2 <- coxph(surv_obj2 ~ contrainte_interet + contrainte_motivation + contrainte_internet +
+         contrainte_ordi + contrainte_elect + contrainte_boulot + contrainte_fam +
+         contrainte_sante + contrainte_note + contrainte_finance + contrainte_autr_etud +
+         contrainte_sujet_complexe + contrainte_sujet_recherche + contrainte_donnees +
+         contrainte_analyse_donnees + contrainte_encadrement + contrainte_emigration +
+         contrainte_autre, id = id, data = df3)
+
+cox_step2 <- stepAIC(fullmodel2, direction = "both", trace = FALSE)
+summary(cox_step2)
+```
+
+
+# **Importing dataset 2 for Survival Analysis**
+
+```{r}
+df_mem2 <- read_excel('./Data_model22.xlsx')
+```
+
+# **Multivariate Analysis II**
+
+```{r, echo=FALSE}
+## **Data wrangling**
+
+df_mem2$depot <- as.factor(df_mem2$depot)
+df_mem2$recoded_temps_depot <- as.factor(df_mem2$recoded_temps_depot)
+df_mem2$sexe <- as.factor(df_mem2$sexe)
+df_mem2$loc_etud_sec <- as.factor(df_mem2$loc_etud_sec)
+df_mem2$type_etab_term <- as.factor(df_mem2$type_etab_term)
+df_mem2$compos_seuh <- as.factor(df_mem2$compos_seuh)
+df_mem2$domaine_etud1 <- as.factor(df_mem2$domaine_etud1)
+df_mem2$domaine_etud2 <- as.factor(df_mem2$domaine_etud2)
+df_mem2$generation <- as.factor(df_mem2$generation)
+df_mem2$autr_etud <- as.factor(df_mem2$autr_etud)
+df_mem2$approche <- as.factor(df_mem2$approche)
+df_mem2$qual_accomp <- as.factor(df_mem2$qual_accomp)
+df_mem2$temps_emploi <- as.factor(df_mem2$temps_emploi)
+df_mem2$contrainte <- as.factor(df_mem2$contrainte)
+
+df_mem2$contrainte_interet <- as.integer(df_mem2$contrainte_interet)
+df_mem2$contrainte_interet <- as.factor(df_mem2$contrainte_interet)
+
+df_mem2$contrainte_motivation <- as.integer(df_mem2$contrainte_motivation)
+df_mem2$contrainte_motivation <- as.factor(df_mem2$contrainte_motivation)
+
+df_mem2$contrainte_ordi <- as.integer(df_mem2$contrainte_ordi)
+df_mem2$contrainte_ordi <- as.factor(df_mem2$contrainte_ordi)
+
+df_mem2$contrainte_elect <- as.integer(df_mem2$contrainte_elect)
+df_mem2$contrainte_elect <- as.factor(df_mem2$contrainte_elect)
+
+df_mem2$contrainte_internet <- as.integer(df_mem2$contrainte_internet)
+df_mem2$contrainte_internet <- as.factor(df_mem2$contrainte_internet)
+
+df_mem2$contrainte_boulot <- as.integer(df_mem2$contrainte_boulot)
+df_mem2$contrainte_boulot <- as.factor(df_mem2$contrainte_boulot)
+
+df_mem2$contrainte_fam <- as.integer(df_mem2$contrainte_fam)
+df_mem2$contrainte_fam <- as.factor(df_mem2$contrainte_fam)
+
+df_mem2$contrainte_sante <- as.integer(df_mem2$contrainte_sante)
+df_mem2$contrainte_sante <- as.factor(df_mem2$contrainte_sante)
+
+df_mem2$contrainte_note <- as.integer(df_mem2$contrainte_note)
+df_mem2$contrainte_note <- as.factor(df_mem2$contrainte_note)
+
+df_mem2$contrainte_finance <- as.integer(df_mem2$contrainte_finance)
+df_mem2$contrainte_finance <- as.factor(df_mem2$contrainte_finance)
+
+df_mem2$contrainte_autr_etud <- as.integer(df_mem2$contrainte_autr_etud)
+df_mem2$contrainte_autr_etud <- as.factor(df_mem2$contrainte_autr_etud)
+
+df_mem2$contrainte_sujet_recherche <- as.integer(df_mem2$contrainte_sujet_recherche)
+df_mem2$contrainte_sujet_recherche <- as.factor(df_mem2$contrainte_sujet_recherche)
+
+df_mem2$contrainte_sujet_complexe <- as.integer(df_mem2$contrainte_sujet_complexe)
+df_mem2$contrainte_sujet_complexe <- as.factor(df_mem2$contrainte_sujet_complexe)
+
+df_mem2$contrainte_donnees <- as.integer(df_mem2$contrainte_donnees)
+df_mem2$contrainte_donnees <- as.factor(df_mem2$contrainte_donnees)
+
+df_mem2$contrainte_analyse_donnees <- as.integer(df_mem2$contrainte_analyse_donnees)
+df_mem2$contrainte_analyse_donnees <- as.factor(df_mem2$contrainte_analyse_donnees)
+
+df_mem2$contrainte_encadrement <- as.integer(df_mem2$contrainte_encadrement)
+df_mem2$contrainte_encadrement <- as.factor(df_mem2$contrainte_encadrement)
+
+df_mem2$contrainte_emigration <- as.integer(df_mem2$contrainte_emigration)
+df_mem2$contrainte_emigration <- as.factor(df_mem2$contrainte_emigration)
+
+df_mem2$contrainte_autre <- as.integer(df_mem2$contrainte_autre)
+df_mem2$contrainte_autre <- as.factor(df_mem2$contrainte_autre)
+
+df_mem2$info_tfe <- as.factor(df_mem2$info_tfe)
+df_mem2$difficulte_tfe <- as.factor(df_mem2$difficulte_tfe)
+df_mem2$utilite_tfe <- as.factor(df_mem2$utilite_tfe)
+df_mem2$projet_personnel <- as.factor(df_mem2$projet_personnel)
+df_mem2$choix_etud <- as.factor(df_mem2$choix_etud)
+df_mem2$education_fam <- as.factor(df_mem2$education_fam)
+
+df_mem2$consommation_pps <- as.integer(df_mem2$consommation_pps)
+df_mem2$consommation_pps <- as.factor(df_mem2$consommation_pps)
+
+```
+
+
+
+```{r, echo = FALSE, include=FALSE}
+## Survival Analysis III
+
+### Draw the subset for survival analysis III
+
+df4 <- df_mem2 %>%
+    select(colnames(df_mem),-var1, contrainte, -c('soutenance', 'temps_soutenance',
+                                     'duree_etud_pot', 'duree_etud_reel',
+                                     'duree_etud_diff', 'consent', 'preciser_etab_term',
+                                     'etud_1', 'tranche_age', 'fac',
+                                     'etud_2', 'comment_accomp',
+                                     'preciser_autr_contr', 'domaine_etud2',
+                                     'comment_difficulte', 'comment_utilite',
+                                     'promotion', 'recoded_temps_depot')) %>%
+  mutate(depot = ifelse(depot == "Oui", 1, 0))
+  #filter(contrainte == "Oui")
+
+```
+
+
+```{r, echo = FALSE, include=FALSE}
+### Stepwise selection: `contrainte` "Oui" and "Non"
+
+# Index column
+df4$id <- 1:nrow(df4)
+
+surv_obj3 <- Surv(df4$temps_depot, df4$depot)
+fullmodel3 <- coxph(surv_obj3 ~ contrainte_interet + contrainte_motivation + contrainte_internet +
+         contrainte_ordi + contrainte_elect + contrainte_boulot + contrainte_fam +
+         contrainte_sante + contrainte_note + contrainte_finance + contrainte_autr_etud +
+         contrainte_sujet_complexe + contrainte_sujet_recherche + contrainte_donnees +
+         contrainte_analyse_donnees + contrainte_encadrement + contrainte_emigration +
+         contrainte_autre, id = id, data = df4)
+
+cox_step <- stepAIC(fullmodel3, direction = "both", trace = FALSE)
+summary(cox_step)
+```
+
+
+## Variable `temps_depot`: Normality test
+```{r}
+shapiro.test(df2$temps_depot) 
+
+```
+
+The variable `temps_depot` is not normally distributed as our p-value is inferior to 0.05.
+
+## Survival Analysis IV
+
+### Draw the subset for survival analysis IV
+
+```{r}
+df5 <- df_mem2 %>%
+    select(colnames(df_mem),-var1, contrainte, -c('soutenance', 'temps_soutenance',
+                                     'duree_etud_pot', 'duree_etud_reel',
+                                     'duree_etud_diff', 'consent', 'preciser_etab_term',
+                                     'etud_1', 'tranche_age', 'fac',
+                                     'etud_2', 'comment_accomp',
+                                     'preciser_autr_contr', 'domaine_etud2',
+                                     'comment_difficulte', 'comment_utilite',
+                                     'promotion', 'recoded_temps_depot')) %>%
+  mutate(depot = ifelse(depot == "Oui", 1, 0)) %>%
+  filter(contrainte == "Oui")
+
+```
+
+
+
+### Stepwise selection: `contrainte` "Oui" only
+
+```{r}
+df5$id <- 1:nrow(df5)
+
+surv_obj4 <- Surv(df5$temps_depot, df5$depot)
+fullmodel4 <- coxph(surv_obj4 ~ contrainte_interet + contrainte_motivation + contrainte_internet +
+         contrainte_ordi + contrainte_elect + contrainte_boulot + contrainte_fam +
+         contrainte_sante + contrainte_note + contrainte_finance + contrainte_autr_etud +
+         contrainte_sujet_complexe + contrainte_sujet_recherche + contrainte_donnees +
+         contrainte_analyse_donnees + contrainte_encadrement + contrainte_emigration +
+         contrainte_autre, id = id, data = df5)
+
+cox_step <- stepAIC(fullmodel4, direction = "both", trace = FALSE)
+summary(cox_step)
+```
+
+
+
+### Graphical analysis - Kaplan-Meier Curve
+
+```{r}
+surv <- survfit(Surv(temps_depot, depot) ~ 1, data = df5)
+
+plot(surv, col = c("red", "blue", "black", "green", "magenta"), lty = 1, xlab = "Time",
+     ylab = "Survival Probability", main = "Kaplan-Meier Curve")
+#abline(h=0.5, col="green")
+```
+
+```{r}
+surv
+```
+
+
+
+### Checking the hypothesis of proportionality of the hazards
+```{r log-log graphic}
+suppressPackageStartupMessages(library(survminer))
+
+ggcoxdiagnostics(cox_step, type = "martingale")
+```
+
+### Risk function graphic
+
+```{r Risk function}
+ggsurvplot(survfit(cox_step), data = df5, risk.table = TRUE, risk.table.col = "strata", pval = TRUE)
+```
+
+
+
+```{r, echo=FALSE}
+## Another Survival Analysis _ General Model
+
+df6 <- df_mem2 %>%
+  select(-c("consent", "tranche_age", "preciser_etab_term", "fac", "etud_1", "domaine_etud2", "promotion", "recoded_temps_depot", "temps_soutenance", "duree_etud_reel", "etud_2", "soutenance", "duree_etud_pot", "duree_etud_diff", "comment_accomp", "preciser_autr_contr", "comment_difficulte", "comment_utilite")) %>%
+  mutate(depot = ifelse(depot == "Oui", 1, 0)) %>%
+  filter(contrainte == "Oui")
+
+```
+
+
+
+```{r, eval = FALSE, echo=FALSE, warning = FALSE}
+### Stepwise selection: `contrainte` "Oui" only
+
+df6$id <- 1:nrow(df6)
+
+surv_obj5 <- Surv(df6$temps_depot, df6$depot)
+
+fullmodel5 <- coxph(surv_obj5 ~ sexe + loc_etud_sec + type_etab_term + compos_seuh + domaine_etud1 + autr_etud + generation + approche + qual_accomp + temps_emploi + contrainte + info_tfe + difficulte_tfe + utilite_tfe + projet_personnel + choix_etud + consommation_pps + education_fam + contrainte_interet + contrainte_motivation + contrainte_internet +       contrainte_ordi + contrainte_elect + contrainte_boulot + contrainte_fam +
+contrainte_sante + contrainte_note + contrainte_finance + contrainte_autr_etud + contrainte_sujet_complexe + contrainte_sujet_recherche + contrainte_donnees + contrainte_analyse_donnees + contrainte_encadrement + contrainte_emigration + contrainte_autre, id = id, data = df6)
+
+cox_step3 <- stepAIC(fullmodel5, direction = "both", trace = FALSE)
+summary(cox_step3)
+```
+
+
+
+## Survival analysis: sig. factors model LR + sig. contraintes
+
+```{r}
+df6$id <- 1:nrow(df6)
+
+surv_obj5 <- Surv(df6$temps_depot, df6$depot)
+
+fullmodel5 <- coxph(surv_obj5 ~ sexe + qual_accomp + contrainte + contrainte_motivation + contrainte_elect + contrainte_sante + contrainte_finance + contrainte_sujet_complexe, id = id, data = df6)
+
+cox_step3 <- stepAIC(fullmodel5, direction = "both", trace = FALSE)
+summary(cox_step3)
+```
+
+### Survival Analysis: factors LR
+
+```{r, eval = FALSE, echo=FALSE, warning = FALSE}
+### Stepwise selection: `contrainte` "Oui" only
+
+df6$id <- 1:nrow(df6)
+
+surv_obj5 <- Surv(df6$temps_depot, df6$depot)
+
+fullmodel7 <- coxph(surv_obj5 ~ sexe + loc_etud_sec + type_etab_term + compos_seuh + domaine_etud1 + autr_etud + generation + approche + qual_accomp + temps_emploi + contrainte + info_tfe + difficulte_tfe + utilite_tfe + projet_personnel + choix_etud + consommation_pps + education_fam, id = id, data = df6)
+
+cox_step4 <- stepAIC(fullmodel7, direction = "both", trace = FALSE)
+summary(cox_step4)
+```
+
+
+
