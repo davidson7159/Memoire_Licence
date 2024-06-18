@@ -1,0 +1,320 @@
+---
+title: "Exploratory_Data_Analysis_Memoire"
+author: "Davidson Adrien"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(scipen = 999)
+```
+
+## **Import packages**
+
+```{r, warning=FALSE}
+suppressPackageStartupMessages(library(readxl))
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(caret))
+suppressPackageStartupMessages(library(glmulti))
+suppressPackageStartupMessages(library(flextable))
+suppressPackageStartupMessages(library(performance))
+suppressPackageStartupMessages(library(Rcpp))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(see))
+suppressPackageStartupMessages(library(skimr))
+suppressPackageStartupMessages(library(ggthemes))
+suppressPackageStartupMessages(library(dlookr))
+suppressPackageStartupMessages(library(report))
+suppressPackageStartupMessages(library(ggstatsplot))
+suppressPackageStartupMessages(library(gt))
+
+```
+
+## **Import datasets**
+
+```{r}
+df_mem <- read_excel('./Data_model2.xlsx')
+df_mem2 <- read_excel('./Data_model22.xlsx')
+```
+
+
+## **Creating full temps_depot column**
+
+```{r, warning=FALSE}
+df_mem$temps_depot_complet <- df_mem2$temps_depot
+```
+
+
+## **Factorization**
+
+```{r, warning=FALSE}
+df_mem$depot <- as.factor(df_mem$depot)
+df_mem$sexe <- as.factor(df_mem$sexe)
+df_mem$loc_etud_sec <- as.factor(df_mem$loc_etud_sec)
+df_mem$type_etab_term <- as.factor(df_mem$type_etab_term)
+df_mem$compos_seuh <- as.factor(df_mem$compos_seuh)
+df_mem$domaine_etud1 <- as.factor(df_mem$domaine_etud1)
+df_mem$domaine_etud2 <- as.factor(df_mem$domaine_etud2)
+df_mem$generation <- as.factor(df_mem$generation)
+df_mem$autr_etud <- as.factor(df_mem$autr_etud)
+df_mem$approche <- as.factor(df_mem$approche)
+df_mem$qual_accomp <- as.factor(df_mem$qual_accomp)
+df_mem$temps_emploi <- as.factor(df_mem$temps_emploi)
+df_mem$contrainte <- as.factor(df_mem$contrainte)
+
+df_mem$contrainte_interet <- as.integer(df_mem$contrainte_interet)
+df_mem$contrainte_interet <- as.factor(df_mem$contrainte_interet)
+
+df_mem$contrainte_motivation <- as.integer(df_mem$contrainte_motivation)
+df_mem$contrainte_motivation <- as.factor(df_mem$contrainte_motivation)
+
+df_mem$contrainte_ordi <- as.integer(df_mem$contrainte_ordi)
+df_mem$contrainte_ordi <- as.factor(df_mem$contrainte_ordi)
+
+df_mem$contrainte_elect <- as.integer(df_mem$contrainte_elect)
+df_mem$contrainte_elect <- as.factor(df_mem$contrainte_elect)
+
+df_mem$contrainte_internet <- as.integer(df_mem$contrainte_internet)
+df_mem$contrainte_internet <- as.factor(df_mem$contrainte_internet)
+
+df_mem$contrainte_boulot <- as.integer(df_mem$contrainte_boulot)
+df_mem$contrainte_boulot <- as.factor(df_mem$contrainte_boulot)
+
+df_mem$contrainte_fam <- as.integer(df_mem$contrainte_fam)
+df_mem$contrainte_fam <- as.factor(df_mem$contrainte_fam)
+
+df_mem$contrainte_sante <- as.integer(df_mem$contrainte_sante)
+df_mem$contrainte_sante <- as.factor(df_mem$contrainte_sante)
+
+df_mem$contrainte_note <- as.integer(df_mem$contrainte_note)
+df_mem$contrainte_note <- as.factor(df_mem$contrainte_note)
+
+df_mem$contrainte_finance <- as.integer(df_mem$contrainte_finance)
+df_mem$contrainte_finance <- as.factor(df_mem$contrainte_finance)
+
+df_mem$contrainte_autr_etud <- as.integer(df_mem$contrainte_autr_etud)
+df_mem$contrainte_autr_etud <- as.factor(df_mem$contrainte_autr_etud)
+
+df_mem$contrainte_sujet_recherche <- as.integer(df_mem$contrainte_sujet_recherche)
+df_mem$contrainte_sujet_recherche <- as.factor(df_mem$contrainte_sujet_recherche)
+
+df_mem$contrainte_sujet_complexe <- as.integer(df_mem$contrainte_sujet_complexe)
+df_mem$contrainte_sujet_complexe <- as.factor(df_mem$contrainte_sujet_complexe)
+
+df_mem$contrainte_donnees <- as.integer(df_mem$contrainte_donnees)
+df_mem$contrainte_donnees <- as.factor(df_mem$contrainte_donnees)
+
+df_mem$contrainte_analyse_donnees <- as.integer(df_mem$contrainte_analyse_donnees)
+df_mem$contrainte_analyse_donnees <- as.factor(df_mem$contrainte_analyse_donnees)
+
+df_mem$contrainte_encadrement <- as.integer(df_mem$contrainte_encadrement)
+df_mem$contrainte_encadrement <- as.factor(df_mem$contrainte_encadrement)
+
+df_mem$contrainte_emigration <- as.integer(df_mem$contrainte_emigration)
+df_mem$contrainte_emigration <- as.factor(df_mem$contrainte_emigration)
+
+df_mem$contrainte_autre <- as.integer(df_mem$contrainte_autre)
+df_mem$contrainte_autre <- as.factor(df_mem$contrainte_autre)
+
+df_mem$info_tfe <- as.factor(df_mem$info_tfe)
+df_mem$difficulte_tfe <- as.factor(df_mem$difficulte_tfe)
+df_mem$utilite_tfe <- as.factor(df_mem$utilite_tfe)
+df_mem$projet_personnel <- as.factor(df_mem$projet_personnel)
+df_mem$choix_etud <- as.factor(df_mem$choix_etud)
+df_mem$education_fam <- as.factor(df_mem$education_fam)
+
+df_mem$consommation_pps <- as.integer(df_mem$consommation_pps)
+df_mem$consommation_pps <- as.factor(df_mem$consommation_pps)
+
+```
+
+
+## **Multivariate analysis**
+
+### Sexe x Temps_depot x Depot
+
+```{r, warning=FALSE, echo=FALSE}
+s <- grouped_ggbetweenstats(
+  data = df_mem,
+  x = sexe,
+  y = temps_depot_complet,
+  grouping.var = depot,
+  pairwise_comparisons = T,
+  bf.message = T,
+  outlier.tagging = T,
+  type = 'np',
+  p.adjust.method = 'holm',
+  pairwise.display = 'all',
+  xlab = "Sexe",
+  ylab = "Temps depuis fin des cours",
+  nrow = 2,
+  title.prefix = "Depot",
+  caption = substitute(paste(italic("Source"),
+                             ": Enquête de l'auteur, Septembre 2022")),
+  palette = "default_jama",
+  package = "ggsci",
+  messages = FALSE,
+  title.text = "Difference in time submission or not by sex"
+)
+
+s
+```
+
+
+### Nbre_contrainte x Temps_depot x Depot
+```{r, warning=FALSE, echo=FALSE}
+c <- ggstatsplot::grouped_ggscatterstats(
+  data = df_mem,
+  x = nombre_contrainte,
+  y = temps_depot_complet,
+  bf.message = TRUE,      # display bayes factor message
+  xfill = "#E69F00",
+  yfill = "#8b3058",
+  xlab = "Nombre de contraintes",
+  ylab = "Temps dépôt",
+  grouping.var = depot,   # grouping variable
+  title.prefix = "Depot",
+  ggtheme = ggplot2::theme_grey(),
+  messages = FALSE,
+  nrow = 2,
+  title.text = "Scatterplot Contraint x Temps_depot"
+)
+
+c
+```
+
+### Composantes SESUH x Temps_depot x Depot
+
+```{r, echo=FALSE}
+u <- grouped_ggbetweenstats(
+  data = df_mem,
+  x = compos_seuh,
+  y = temps_depot_complet,
+  grouping.var = depot,
+  pairwise_comparisons = T,
+  bf.message = T,
+  outlier.tagging = T,
+  type = 'np',
+  p.adjust.method = 'holm',
+  pairwise.display = 'all',
+  xlab = "Composantes du SESUH",
+  ylab = "Temps depuis fin des cours",
+  nrow = 2,
+  title.prefix = "Depot",
+  caption = substitute(paste(italic("Source"),
+                             ": Enquête de l'auteur, Septembre 2022")),
+  palette = "default_jama",
+  package = "ggsci",
+  messages = FALSE,
+  title.text = "Difference in time submission or not by sex"
+)
+
+u
+```
+
+### Qualité accompagnement x Temps_depot x Depot
+
+```{r, echo=FALSE}
+q <- grouped_ggbetweenstats(
+  data = df_mem,
+  x = qual_accomp,
+  y = temps_depot_complet,
+  grouping.var = depot,
+  pairwise_comparisons = T,
+  bf.message = T,
+  outlier.tagging = T,
+  type = 'np',
+  p.adjust.method = 'holm',
+  pairwise.display = 'all',
+  xlab = "Qualification de l'accompagnement",
+  ylab = "Temps depuis fin des cours",
+  nrow = 2,
+  title.prefix = "Depot",
+  caption = substitute(paste(italic("Source"),
+                             ": Enquête de l'auteur, Septembre 2022")),
+  palette = "default_jama",
+  package = "ggsci",
+  messages = FALSE,
+  title.text = "Difference in time submission or not by sex"
+)
+
+q
+```
+
+
+### Domaine d'Etudes x Temps_depot x Depot
+
+```{r, warning=FALSE, echo=FALSE}
+d <- grouped_ggbetweenstats(
+  data = df_mem,
+  x = domaine_etud1,
+  y = temps_depot_complet,
+  grouping.var = depot,
+  pairwise_comparisons = T,
+  bf.message = T,
+  outlier.tagging = T,
+  type = 'np',
+  p.adjust.method = 'holm',
+  pairwise.display = 'all',
+  xlab = "Domaines d'études",
+  ylab = "Temps depuis fin des cours",
+  nrow = 2,
+  ncol = 1,
+  title.prefix = "Depot",
+  caption = substitute(paste(italic("Source"),
+                             ": Enquête de l'auteur, Septembre 2022")),
+  palette = "default_jama",
+  package = "ggsci",
+  messages = FALSE,
+  title.text = "Difference in time submission or not by sex"
+)
+
+d
+```
+
+
+### Motivation x Temps_depot x Depot
+
+```{r, echo=FALSE}
+m <- grouped_ggbetweenstats(
+  data = df_mem,
+  x = contrainte_motivation,
+  y = temps_depot_complet,
+  grouping.var = depot,
+  pairwise_comparisons = T,
+  bf.message = T,
+  outlier.tagging = T,
+  type = 'np',
+  p.adjust.method = 'holm',
+  pairwise.display = 'all',
+  xlab = "Contrainte de Motivation",
+  ylab = "Temps depuis fin des cours",
+  nrow = 2,
+  title.prefix = "Depot",
+  caption = substitute(paste(italic("Source"),
+                             ": Enquête de l'auteur, Septembre 2022")),
+  palette = "default_jama",
+  package = "ggsci",
+  messages = FALSE,
+  title.text = "Difference in time submission or not by sex"
+)
+
+m
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
